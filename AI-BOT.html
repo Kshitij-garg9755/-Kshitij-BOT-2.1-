@@ -1,0 +1,487 @@
+<!DOCTYPE html><html>
+<head>
+  <title>Kshitij BOT 2.1 Pro Max</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 40px;
+      margin: 0;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    h1 {
+      color: #00ff99;
+      margin-bottom: 30px;
+    }
+    .chat-container {
+      background: #1e1e1e;
+      border-radius: 15px;
+      padding: 20px;
+      width: 90%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      height: 70%;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    .chat {
+      flex-grow: 1;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      padding-right: 10px;
+    }
+    .chat::-webkit-scrollbar {
+      width: 8px;
+    }
+    .chat::-webkit-scrollbar-thumb {
+      background-color: #555;
+      border-radius: 10px;
+    }
+    .msg {
+      background: #333;
+      padding: 12px 15px;
+      margin: 8px 0;
+      border-radius: 15px;
+      max-width: 80%;
+      word-wrap: break-word;
+      line-height: 1.4;
+      animation: fadeIn 0.3s ease;
+    }
+    .msg.user {
+      background: #007bff;
+      color: #fff;
+      margin-left: auto;
+      border-bottom-right-radius: 5px;
+    }
+    .msg.bot {
+      background: #4a4a4a;
+      color: #e0e0e0;
+      margin-right: auto;
+      border-bottom-left-radius: 5px;
+    }
+    .input-area {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 15px;
+      border-top: 1px solid #444;
+    }
+    input {
+      flex-grow: 1;
+      padding: 12px 15px;
+      border-radius: 20px;
+      border: 1px solid #555;
+      background: #222;
+      color: #e0e0e0;
+      font-size: 1em;
+    }
+    button {
+      padding: 10px 20px;
+      border-radius: 20px;
+      border: none;
+      background: #00ff99;
+      color: #121212;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Assistant </h1>  <div class="chat-container">
+    <div class="chat" id="chatBox"></div>
+    <div class="input-area">
+      <input id="userInput" placeholder="Type your command...">
+      <button id="sendBtn">Send</button>
+    </div>
+  </div><script>
+    let hindiVoice = null;
+    window.speechSynthesis.onvoiceschanged = () => {
+    const voices = window.speechSynthesis.getVoices();
+    hindiVoice = voices.find(voice => voice.lang === 'hi-IN' || voice.name.toLowerCase().includes('Hindi'));
+};
+  let records = [];
+  const chatBox = document.getElementById('chatBox');
+  const userInput = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+
+  sendBtn.addEventListener('click', send);
+  userInput.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') send();
+  });
+
+  function send() {
+    let inputText = userInput.value.trim();
+    if (inputText === '') return;
+    displayMessage(inputText, 'user');
+    records.push(inputText);
+    userInput.value = '';
+    processAndReply(inputText);
+  }
+
+  function processAndReply(inputText) {
+    displayTyping();
+    setTimeout(() => {
+      let reply = generateBotReply(inputText);
+      removeTyping();
+      displayMessage(reply, 'bot');
+    speak(reply);
+    }, 800);
+    
+  }
+  function speak(text) {
+  if (!hindiVoice) {
+    console.log("Hindi voice not found!");
+    return;
+  }
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.voice = hindiVoice;
+  speechSynthesis.speak(utterance);
+}
+function speak(text) {
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'hi-IN';  // Hindi language
+  if (hindiVoice) {
+    utterance.voice = hindiVoice;
+  }
+  speechSynthesis.speak(utterance);
+}
+  function generateBotReply(input) {
+    let text = input.toLowerCase();
+    
+
+    // Check if input is a math expression
+if (/^[\d\s\+\-\*\/\.]+$/.test(text)) {
+  try {
+    let result = eval(text);
+    return `Result: ${result}`;
+  } catch (e) {
+    return "Invalid math expression.";
+  }
+}
+     else if (text.includes('court')) {
+      return "📚 Court Section Info: IPC 302 (Murder), IPC 376 (Rape), IPC 420 (Cheating), IPC 307 (Attempt to Murder). आप किस सेक्शन की जानकारी चाहते हैं?";
+    }
+      else if (text.includes('ipc 302')) {
+      return "आईपीसी की धारा 302 में हत्या (murder) से संबंधित प्रावधान है। यदि कोई व्यक्ति जानबूझकर और गैरकानूनी तरीके से किसी दूसरे व्यक्ति की हत्या करता है, तो उस पर आईपीसी धारा 302 के तहत मामला दर्ज किया जाता है.";
+    }
+    else if (text.includes('ipc 420')) {
+      return "आईपीसी 420 धोखाधड़ी से संबंधित एक धारा है। इसके तहत, यदि कोई व्यक्ति किसी अन्य व्यक्ति को धोखा देकर उसकी संपत्ति या किसी मूल्यवान वस्तु को हासिल करता है, तो वह अपराध करता है. इस धारा में सजा 7 साल तक की कैद और जुर्माना शामिल है.";
+    }
+    else if (text.includes('ipc 374')) {
+      return "आईपीसी 374 अवैध और गैरकानूनी रूप से किसी व्यक्ति को उसकी इच्छा के विरुद्ध श्रम करने के लिए मजबूर करने से संबंधित है। यह धारा किसी व्यक्ति को बलपूर्वक काम करने के लिए मजबूर करने के अपराध से संबंधित है";
+    }
+    
+   else if (input.includes("hello")) {
+    return "Hello! How can I assist you today?";
+  } 
+  
+  
+  
+  else if (input.includes("hi")) {
+    return "Hi there! What can I do for you?";
+  }
+  
+  
+  else if (input.includes("good morning")||input.includes("gm") ) {
+    return "Good morning! Have a productive day ahead!";
+  }
+  
+  
+  else if (input.includes("good night")||input.includes("gn")) {
+    return "Good night! Sweet dreams.";
+  }
+  
+  
+  else if (input.includes("jarvis")) {
+    return "I’m Jarvis, your personal AI assistant.";
+  }
+  
+  
+  else if (input.includes(" your name")) {
+    return "You can call me Jarvis.";
+  }
+  
+  
+  else if (input.includes("time")) {
+    return "It's currently 4:30 PM.";
+  }
+  
+  
+  else if (input.includes("what's the date today")) {
+    return "Today's date is 25th May 2025.";
+  }
+  
+  
+  else if (input.includes("open google")) {
+    return "Opening Google for you...";
+  }
+  
+  
+  else if (input.includes("open youtube")) {
+    return "Opening YouTube...";
+  }
+  
+  
+  else if (input.includes("open facebook")) {
+    return "Opening Facebook...";
+  }
+  
+  
+  else if (input.includes("open instagram")) {
+    return "Opening Instagram...";
+  } 
+  
+  
+  else if (input.includes("play music")) {
+    return "Playing your favorite playlist.";
+  }
+  
+  
+  else if (input.includes("pause music")) {
+    return "Music paused.";
+  }
+  
+  
+  else if (input.includes("next song")) {
+    return "Skipping to the next song.";
+  }
+  
+  
+  else if (input.includes("previous song")) {
+    return "Going back to the previous song.";
+  }
+  
+  
+  else if (input.includes("increase volume")) {
+    return "Increasing volume.";
+  }
+  
+  
+  else if (input.includes("decrease volume")) {
+    return "Decreasing volume.";
+  }
+  
+  
+  else if (input.includes("mute volume")) {
+    return "Volume muted.";
+  }
+  
+  
+  else if (input.includes("unmute volume")) {
+    return "Volume unmuted.";
+  }
+  
+  
+  else if (input.includes("weather today")) {
+    return "It's sunny today with a temperature of 30°C.";
+  }
+  
+  
+  else if (input.includes("rain today")) {
+    return "There's a 40% chance of rain today.";
+  }
+  
+  
+  else if (input.includes("tell me a joke")) {
+    return "Why did the computer go to therapy? Because it had too many bytes!";
+  }
+  
+  
+  else if (input.includes("tell me another joke")) {
+    return "Why don't programmers like nature? It has too many bugs.";
+  } 
+  
+  
+  else if (input.includes("search for python tutorials")) {
+    return "Searching Python tutorials for you...";
+  }
+  
+  
+  else if (input.includes("search for java documentation")) {
+    return "Here is the Java documentation from Oracle.";
+  }
+  
+  
+  else if (input.includes("shutdown system")) {
+    return "Are you sure you want to shut down the system?";
+  }
+  
+  
+  else if (input.includes("restart computer")) {
+    return "Restarting system now...";
+  }
+  
+  
+  else if (input.includes("lock system")) {
+    return "System locked.";
+  }
+  
+  
+  else if (input.includes("set a reminder")) {
+    return "What would you like me to remind you about?";
+  }
+  
+  
+  else if (input.includes("set alarm")) {
+    return "At what time should I set the alarm?";
+  } 
+  
+  
+  else if (input.includes("take a note")) {
+    return "What would you like to note down?";
+  } 
+  
+  
+  else if (input.includes("what's in my calendar")) {
+    return "You have 2 meetings today at 2 PM and 5 PM.";
+  } 
+  
+  
+  else if (input.includes("translate hello to spanish")) {
+    return "‘Hello’ in Spanish is ‘Hola’.";
+  } 
+  
+  
+  else if (input.includes("thank you in french")) {
+    return "‘Thank you’ in French is ‘Merci’.";
+  }
+  
+  
+  else if (input.includes("what is ai")) {
+    return "Artificial Intelligence is the simulation of human intelligence in machines.";
+  }
+  
+  
+  else if (input.includes("what is machine learning")) {
+    return "Machine Learning is a branch of AI that focuses on data-driven learning.";
+  } 
+  
+  
+  else if (input.includes("who is elon musk")) {
+    return "Elon Musk is the CEO of Tesla and SpaceX.";
+  } 
+  
+  
+  else if (input.includes("tell me a fun fact")) {
+    return "Did you know? Honey never spoils.";
+  }
+  
+  
+  else if (input.includes("capital of india")) {
+    return "New Delhi is the capital of India.";
+  } 
+  
+  
+  else if (input.includes("10 plus 20")) {
+    return "10 plus 20 is 30.";
+  } 
+  
+  
+  else if (input.includes("25 times 4")) {
+    return "25 times 4 is 100.";
+  }
+  
+  
+  else if (input.includes("moon kitne door")||text.includes('chand')) {
+    return "The moon is approximately 384,400 km from Earth.";
+  } 
+  
+  
+  else if (input.includes("start timer")) {
+    return "Timer started.";
+  }
+  
+  
+  else if (input.includes("stop timer")) {
+    return "Timer stopped.";
+  } 
+  
+  
+  else if (input.includes("reset timer")) {
+    return "Timer reset.";
+  } 
+  
+  
+  else if (input.includes("lights on")) {
+    return "Turning on the lights.";
+  } 
+  
+  
+  else if (input.includes(" lights off ")) {
+    return "Turning off the lights.";
+  } 
+  
+  
+  else if (input.includes("how are you")) {
+    return "I'm functioning perfectly. Thanks for asking!";
+  } 
+  
+  
+  else if (input.includes("exit")) {
+    return "Goodbye! Have a nice day.";
+  }
+
+    else if (text.includes('help')) {
+      return " बिल्कुल मैं आपकी क्या मदद कर सकता हूं";
+    }
+  
+    else if (text.includes("ipc 307")) {
+      return "आईपीसी की धारा 307 हत्या के प्रयास से संबंधित है। इसका मतलब है कि किसी व्यक्ति ने जानबूझकर दूसरे व्यक्ति की जान लेने का प्रयास किया हो, लेकिन वह सफल नहीं हुआ हो। यदि कोई व्यक्ति किसी की हत्या कर दे, तो उस पर आईपीसी की धारा 302 के तहत कार्रवाई होती है";
+    }
+      else if (text.includes('ipc section')) {
+      return "1860 में अधिनियमित भारतीय दंड संहिता (आईपीसी) एक व्यापक कानूनी ढांचा है जो विभिन्न अपराधों और उनके अनुरूप दंड को परिभाषित करता है। इसमें कई धाराएँ हैं जो छोटी-मोटी चोरी से लेकर हत्या तक के अपराधों की एक विस्तृत श्रृंखला को कवर करती हैं। एक स्रोत बताता है कि आईपीसी में 511 धाराएँ हैं, लेकिन एक अन्य स्रोत का उल्लेख है कि भारतीय न्याय संहिता (बीएनएस), जो हाल ही में आईपीसी का प्रतिस्थापन है, में 356 धाराएँ हैं खंड 1: आईपीसी के शीर्षक और संचालन की सीमा को परिभाषित करता है धारा 2: भारत के भीतर किए गए अपराधों के लिए दंड का प्रावधान है।धारा 3: यह भारत के बाहर किए गए परंतु भारत के भीतर किए गए अपराधों के लिए दंड से संबंधित है।   व्यक्ति के विरुद्ध अपराध:धारा 302: हत्या को परिभाषित करता है.धारा 319: 'चोट' को संबोधित करता है।धारा 328: गंभीर चोट को ढकता है। धारा 352: हमले या आपराधिक बल का दण्ड देता है। धारा 376: बलात्कार से संबंधित है।   संपत्ति के विरुद्ध अपराध:धारा 378: चोरी को परिभाषित करता है।धारा 383: जबरन वसूली को संबोधित करता है।धारा 390: डकैती को कवर करता है।धारा 415: धोखाधड़ी को परिभाषित करता है।धारा 420: धोखाधड़ी और बेईमानी से संपत्ति हड़पने से संबंधित मामला।   सार्वजनिक शांति के विरुद्ध अपराध:धारा 143: गैरकानूनी सभा के सदस्यों को दण्डित करता है।धारा 146: दंगों को संबोधित करता है।धारा 147: दंगा करने पर सजा का प्रावधान है।धारा 188: इसमें किसी लोक सेवक द्वारा वैध आदेश की अवज्ञा करना शामिल है। अन्य महत्वपूर्ण अनुभाग:धारा 177: झूठी जानकारी देने से संबंधित मामला।धारा 354: शील भंग करने के इरादे से हमला या आपराधिक बल का प्रयोग करना।धारा 499: आपराधिक मानहानि को परिभाषित करता है।   नोट: यह कोई विस्तृत सूची नहीं है, और IPC में कई और धाराएँ हैं जो अपराधों की एक विस्तृत श्रृंखला को कवर करती हैं। प्रत्येक धारा में विशिष्ट शब्द और आवश्यकताएँ होती हैं जो किसी विशेष स्थिति में उसके आवेदन को निर्धारित करती हैं ";
+    
+    }
+    else if (text.includes('prime minister')||text.includes('pm')||text.includes('p.m.')) {
+      return "Narendra modi 2024 के संसदीय चुनावों में एक और निर्णायक जीत के बाद, श्री नरेंद्र मोदी ने 9 जून 2024 को तीसरी बार भारत के प्रधानमंत्री के रूप में शपथ ली। इस जीत ने श्री मोदी के लिए लगातार तीसरे कार्यकाल को चिह्नित किया, जिससे उनके नेतृत्व को और मजबूती मिली।";
+    }
+      else if (text.includes('devlapar')) {
+      return "kshitij garg"}
+    else {
+      return "Sorry, I didn't understand. Try saying 'Please check your sentence'!";
+    }
+  } 
+
+
+
+  function displayMessage(text, sender) {
+    let div = document.createElement('div');
+    div.className = 'msg ' + sender;
+    div.textContent = text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function displayTyping() {
+    let typing = document.createElement('div');
+    typing.id = 'typing';
+    typing.className = 'msg bot';
+    typing.textContent = '🤖 Typing...';
+    chatBox.appendChild(typing);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function removeTyping() {
+    let typing = document.getElementById('typing');
+    if (typing) typing.remove();
+  }
+
+  window.onload = () => {
+    setTimeout(() => {
+      displayMessage('👋 Welcome! I am AI Assistant Type "You can ask me anything" to see .', 'bot');
+    }, 500);
+  }
+</script>
+<!-- <script src="ai.js"></script> -->
+</body>
+</html>
